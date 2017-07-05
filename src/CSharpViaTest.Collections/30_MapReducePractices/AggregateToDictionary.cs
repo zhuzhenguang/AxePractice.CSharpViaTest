@@ -36,9 +36,16 @@ namespace CSharpViaTest.Collections._30_MapReducePractices
             IEqualityComparer<TKey> comparer = null,
             bool overwriteDuplicated = false)
         {
-            throw new NotImplementedException();
+            if (source == null || keySelector == null)
+            {
+                throw new ArgumentNullException();
+            }
+            
+            return source
+                .GroupBy(keySelector, comparer)
+                .ToDictionary(g => g.Key, g => valueSelector(overwriteDuplicated ? g.Last() : g.First()));
         }
-        
+
         #endregion
     }
 
@@ -47,7 +54,7 @@ namespace CSharpViaTest.Collections._30_MapReducePractices
         [Fact]
         public void should_aggregate_to_dictionary()
         {
-            IEnumerable<int> source = new[] {1, 2, 1};
+            IEnumerable<int> source = new[] { 1, 2, 1 };
             IDictionary<int, string> result = source.AggregateToDictionary(
                 item => item,
                 item => item.ToString("D", CultureInfo.InvariantCulture));
@@ -75,7 +82,7 @@ namespace CSharpViaTest.Collections._30_MapReducePractices
                 item => item.Value);
 
             Assert.Equal(
-                new KeyValuePair<int, string>(1, "hello"), 
+                new KeyValuePair<int, string>(1, "hello"),
                 dictionary.Single());
         }
 
@@ -104,7 +111,7 @@ namespace CSharpViaTest.Collections._30_MapReducePractices
         {
             Assert.Throws<ArgumentNullException>(
                 () =>
-                    ((IEnumerable<int>) null).AggregateToDictionary(
+                    ((IEnumerable<int>)null).AggregateToDictionary(
                         item => item,
                         item => item));
         }
@@ -114,7 +121,7 @@ namespace CSharpViaTest.Collections._30_MapReducePractices
         {
             Assert.Throws<ArgumentNullException>(
                 () =>
-                    new [] {1, 2, 3}.AggregateToDictionary(
+                    new[] { 1, 2, 3 }.AggregateToDictionary(
                         (Func<int, int>)null,
                         item => item));
         }
@@ -122,7 +129,7 @@ namespace CSharpViaTest.Collections._30_MapReducePractices
         [Fact]
         public void should_apply_comparer()
         {
-            IEnumerable<string> source = new[] {"Nancy", "nAnCy"};
+            IEnumerable<string> source = new[] { "Nancy", "nAnCy" };
             IEqualityComparer<string> comparer = StringComparer.OrdinalIgnoreCase;
             KeyValuePair<string, string> left = source.AggregateToDictionary(
                 item => item,
